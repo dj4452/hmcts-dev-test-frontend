@@ -1,0 +1,26 @@
+{% extends "template.njk" %}
+
+{% block content %}
+<div class="govuk-width-container">
+  <main class="govuk-main-wrapper">
+
+    <h1 class="govuk-heading-l">{{ title }}</h1>
+
+    {% if error %}
+    <div class="govuk-error-summary">
+      <h2 class="govuk-error-summary__title">{{ error }}</h2>
+    </div>
+    {% endif %}
+    <a href="/tasks" class="govuk-back-link">Back</a>
+    <form method="post">
+      <div class="govuk-form-group">       
+        <label class="govuk-label">Title : {{ data.title }}</label>
+        <label class="govuk-label">Description: {{ data.description }}</label>
+        <label class="govuk-label">Status: {{ data.status }}</label>
+        <label class="govuk-label">Created Date: {{ data.dueDate }}</label>
+      </div>
+    </form>
+
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{% extends "template.njk" %}
+
+{% block content %}
+<h1 class="govuk-heading-xl">The Summary Table</h1>
+
+{% if data | length == 0 %}
+  <p class="govuk-body">No tasks found.</p>
+{% else %}
+
+  {# Build the rows FIRST before rendering the table #}
+  {% set tableRows = [] %}
+  {% for task in data %}
+    {% set actionHtml %}
+      <ul class="govuk-list govuk-list--inline govuk-!-margin-bottom-0">
+        <li><a class="govuk-link" href="/tasks/{{ task.id }}/more">More</a></li>
+        <li><a class="govuk-link" href="/tasks/{{ task.id }}/edit">Edit</a></li>
+        <li><a class="govuk-link" href="/tasks/{{ task.id }}/delete" onclick="return confirm('Are you sure you want to delete this record?')">Delete</a></li>
+      </ul>
+    {% endset %}
+
+    {% set _ = tableRows.push([  
+      { text: task.title },
+      { text:  task.status },
+      { text: task.dueDate },
+      { html: actionHtml }
+    ]) %}
+  {% endfor %}
+
+  {{ govukTable({
+    caption: "Tasks",
+    captionClasses: "govuk-table__caption--m",
+    firstCellIsHeader: false,
+    classes: "govuk-table--small-text-until-tablet",
+    head: [
+      { text: "Title" },
+      { text: "Status" },
+      { text: "Due Date" },
+      { text: "Action" }
+    ],
+    rows: tableRows
+  }) }}
+
+{% endif %}
+
+{{ govukButton({
+  text: "Add a Task",
+  id: "add-task-button",
+  href: "/tasks/new"
+}) }}
+
+{% endblock %}

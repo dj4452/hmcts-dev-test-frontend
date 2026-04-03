@@ -28,11 +28,16 @@ app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, max-age=0, must-revalidate, no-store');
   next();
 });
+const files = glob.sync(__dirname + '/routes/**/*.+(ts|js)', { windowsPathsNoEscape: true });
+console.log('__dirname is:', files);
 
-glob
-  .sync(__dirname + '/routes/**/*.+(ts|js)')
+files
   .map(filename => require(filename))
-  .forEach(route => route.default(app));
+  .forEach(route => {
+    console.log('Loading route:', route);
+    console.log('Default:', route.default);
+    app.use('/', route.default);
+  });
 
 setupDev(app, developmentMode);
 

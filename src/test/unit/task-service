@@ -1,0 +1,132 @@
+import axios from 'axios';
+import TaskService, { TaskPayload } from '../../main/services/task-service';
+
+
+jest.mock('axios');
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+const sampleTask: TaskPayload = {
+  title: 'Test Task',
+  description: 'A description',
+  status: 'open',
+  dueDate: '2099-12-31T00:00:00',
+};
+
+describe('TaskService', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+
+  describe('getAllTasks', () => {
+    it('returns the data array from the API response', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: { data: [sampleTask] } });
+      const result = await TaskService.getAllTasks();
+      expect(result).toEqual([sampleTask]);
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('/tasks'));
+    });
+
+    it('throws when the request fails', async () => {
+      mockedAxios.get.mockRejectedValueOnce(new Error('Network error'));
+      await expect(TaskService.getAllTasks()).rejects.toThrow('Failed to fetch tasks');
+    });
+  });
+
+
+  describe('createTask', () => {
+    it('posts the task payload', async () => {
+      const apiResponse = { success: true, data: sampleTask };
+      mockedAxios.post.mockResolvedValueOnce({ data: apiResponse });
+      const result = await TaskService.createTask(sampleTask);
+      expect(result).toEqual(apiResponse);
+      expect(mockedAxios.post).toHaveBeenCalledWith(
+        expect.stringContaining('/tasks'),
+        sampleTask,
+      );
+    });
+
+    it('throws when the request fails', async () => {
+      mockedAxios.post.mockRejectedValueOnce(new Error('500'));
+      await expect(TaskService.createTask(sampleTask)).rejects.toThrow('Failed to create task');
+    });
+  });
+
+
+  describe('deleteTask', () => {
+    it('calls the correct delete endpoint', async () => {
+      mockedAxios.delete.mockResolvedValueOnce({});
+      await TaskService.deleteTask('42');
+      expect(mockedAxios.delete).toHaveBeenCalledWith(expect.stringContaining('/tasks/42'));
+    });
+
+    it('accepts a numeric id', async () => {
+      mockedAxios.delete.mockResolvedValueOnce({});
+      await TaskService.deleteTask(42);
+      expect(mockedAxios.delete).toHaveBeenCalledWith(expect.stringContaining('/tasks/42'));
+    });
+
+    it('throws when the request fails', async () => {
+      mockedAxios.delete.mockRejectedValueOnce(new Error());
+      await expect(TaskService.deleteTask('42')).rejects.toThrow('Failed to delete task');
+    });
+  });
+
+
+  describe('getTaskById', () => {
+    it('returns task from response when present', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: { data: sampleTask } });
+      const result = await TaskService.getTaskById('1');
+      expect(result).toEqual(sampleTask);
+    });
+
+    it('falls back to response', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: sampleTask });
+      const result = await TaskService.getTaskById('1');
+      expect(result).toEqual(sampleTask);
+    });
+
+    it('calls the correct endpoint', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: { data: sampleTask } });
+      await TaskService.getTaskById('99');
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('/tasks/99'));
+    });
+
+    it('throws when the request fails', async () => {
+      mockedAxios.get.mockRejectedValueOnce(new Error());
+      await expect(TaskService.getTaskById('1')).rejects.toThrow('Failed to fetch task details');
+    });
+  });
+
+ 
+  describe('updateTask', () => {
+    it('calls the PUT endpoint put payload', async () => {
+      mockedAxios.put.mockResolvedValueOnce({});
+      await TaskService.updateTask('5', { title: 'Updated' });
+      expect(mockedAxios.put).toHaveBeenCalledWith(
+        expect.stringContaining('/tasks/5'),
+        { title: 'Updated' },
+      );
+    });
+
+    it('accepts a numeric id', async () => {
+      mockedAxios.put.mockResolvedValueOnce({});
+      await TaskService.updateTask(5, { title: 'Updated' });
+      expect(mockedAxios.put).toHaveBeenCalledWith(
+        expect.stringContaining('/tasks/5'),
+        { title: 'Updated' },
+      );
+    });
+
+    it('sends a partial payload', async () => {
+      mockedAxios.put.mockResolvedValueOnce({});
+      await TaskService.updateTask('5', { status: 'done' });
+      expect(mockedAxios.put).toHaveBeenCalledWith(
+        expect.stringContaining('/tasks/5'),
+        { status: 'done' },
+      );
+    });
+
+    it('throws when the request fails', async () => {
+      mockedAxios.put.mockRejectedValueOnce(new Error());
+      await expect(TaskService.updateTask('5', {})).rejects.toThrow('Failed to update task');
+    });
+  });
+});

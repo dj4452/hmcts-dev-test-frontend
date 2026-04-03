@@ -1,0 +1,44 @@
+import { Router } from 'express';
+import router from '../routes/task-routes';
+
+
+const getRoutes = (r: Router) =>
+  (r as any).stack.map((layer: any) => ({
+    method: Object.keys(layer.route.methods)[0].toUpperCase(),
+    path: layer.route.path,
+  }));
+
+
+describe('task-routes', () => {
+  it('registers GET /tasks', () => {
+    expect(getRoutes(router)).toContainEqual({ method: 'GET', path: '/tasks' });
+  });
+
+  it('registers GET /tasks/new', () => {
+    expect(getRoutes(router)).toContainEqual({ method: 'GET', path: '/tasks/new' });
+  });
+
+  it('registers POST /tasks/new', () => {
+    expect(getRoutes(router)).toContainEqual({ method: 'POST', path: '/tasks/new' });
+  });
+
+  it('registers GET /tasks/:id/edit', () => {
+    expect(getRoutes(router)).toContainEqual({ method: 'GET', path: '/tasks/:id/edit' });
+  });
+
+  it('registers POST /tasks/:id', () => {
+    expect(getRoutes(router)).toContainEqual({ method: 'POST', path: '/tasks/:id' });
+  });
+
+  it('registers GET /tasks/:id/delete', () => {
+    expect(getRoutes(router)).toContainEqual({ method: 'GET', path: '/tasks/:id/delete' });
+  });
+
+  it('registers GET /tasks/:id/more', () => {
+    expect(getRoutes(router)).toContainEqual({ method: 'GET', path: '/tasks/:id/more' });
+  });
+
+  it('registers exactly 7 routes', () => {
+    expect(getRoutes(router)).toHaveLength(7);
+  });
+});

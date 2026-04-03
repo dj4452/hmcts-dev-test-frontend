@@ -1,0 +1,122 @@
+{# src/views/casemanagement/task-form.njk #}
+{% extends "template.njk" %}
+
+{% block beforeContent %}
+{# Back link belongs outside the main container #}
+<a href="/tasks" class="govuk-back-link">Back</a>
+{% endblock %}
+
+{% block content %}
+<div class="govuk-width-container">
+    <main class="govuk-main-wrapper" id="main-content" role="main">
+
+        {# 1. Error Summary must appear before the H1 #}
+        {% if errors %}
+        <div class="govuk-error-summary" data-module="govuk-error-summary">
+            <h2 class="govuk-error-summary__title">There is a problem</h2>
+            <div class="govuk-error-summary__body">
+                <ul class="govuk-list govuk-error-summary__list">                 
+                    {% if errors.title %}<li><a href="#title">{{ errors.title }}</a></li>{% endif %}
+                    {% if errors.status %}<li><a href="#status">{{ errors.status }}</a></li>{% endif %}
+                    {% if errors.dueDate %}<li><a href="#dueDate-day">{{ errors.dueDate }}</a></li>{% endif %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <h1 class="govuk-heading-l">{{ title }}</h1>
+
+        <form method="post" action="{{ action }}" id="task-form" novalidate>
+        {% if data.id %}
+          <input type="hidden" name="_method" value="PUT">
+        {% endif %}          
+           {# Title Field #}
+            <div class="govuk-form-group {% if errors.title %}govuk-form-group--error{% endif %}">
+                <label class="govuk-label" for="title">Title</label>
+                {% if errors.title %}
+                <p id="title-error" class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span> {{ errors.title }}
+                </p>
+                {% endif %}
+                <input class="govuk-input {% if errors.title %}govuk-input--error{% endif %}" id="title" name="title" type="text" value="{{ data.title }}" {% if errors.title %}aria-describedby="title-error"{% endif %}>
+            </div>
+
+            {# Description Field #}
+            <div class="govuk-form-group">
+                <label class="govuk-label" for="description">Description</label>
+                <textarea class="govuk-textarea" id="description" name="description" rows="4">{{ data.description }}</textarea>
+            </div>
+
+            {# Status Field (Converted to Select Dropdown for GOV.UK Compliance) #}
+            <div class="govuk-form-group {% if errors.status %}govuk-form-group--error{% endif %}">
+                <label class="govuk-label" for="status">Status</label>
+                {% if errors.status %}
+                <p id="status-error" class="govuk-error-message">
+                    <span class="govuk-visually-hidden">Error:</span> {{ errors.status }}
+                </p>
+                {% endif %}
+                
+                <select class="govuk-select {% if errors.status %}govuk-select--error{% endif %}" id="status" 
+                name="status" {% if errors.status %}aria-describedby="status-error"{% endif %}>
+                    <option value="">Select a status</option>
+                    <option value="Open" {% if data.status == 'Open' %}selected{% endif %}>Open</option>
+                    <option value="Pending" {% if data.status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Closed" {% if data.status == 'Closed' %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+
+                
+            {# Due Date Field #}
+            <div class="govuk-form-group {% if errors.dueDate %}govuk-form-group--error{% endif %}">
+                <fieldset class="govuk-fieldset" role="group" aria-describedby="dueDate-hint {% if errors.dueDate %}dueDate-error{% endif %}">
+                    <legend class="govuk-fieldset__legend">
+                        <span class="govuk-label govuk-label--s">Due Date</span>
+                    </legend>
+                    <div id="dueDate-hint" class="govuk-hint">For example, 27 3 2025</div>
+                    {% if errors.dueDate %}
+                    <p id="dueDate-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span> {{ errors.dueDate }}
+                    </p>
+                    {% endif %}
+                    <div class="govuk-date-input" id="dueDate">
+                        <div class="govuk-date-input__item">
+                            <div class="govuk-form-group">
+                                <label class="govuk-label govuk-date-input__label" for="dueDate-day">Day</label>
+                                <input class="govuk-input govuk-date-input__input govuk-input--width-2 {% if errors.dueDate %}govuk-input--error{% endif %}"
+                                    id="dueDate-day" name="dueDate-day" type="text"
+                                    inputmode="numeric" value="{{ data['dueDate-day'] }}">
+                            </div>
+                        </div>
+                        <div class="govuk-date-input__item">
+                            <div class="govuk-form-group">
+                                <label class="govuk-label govuk-date-input__label" for="dueDate-month">Month</label>
+                                <input class="govuk-input govuk-date-input__input govuk-input--width-2 {% if errors.dueDate %}govuk-input--error{% endif %}"
+                                    id="dueDate-month" name="dueDate-month" type="text"
+                                    inputmode="numeric" value="{{ data['dueDate-month'] }}">
+                            </div>
+                        </div>
+                        <div class="govuk-date-input__item">
+                            <div class="govuk-form-group">
+                                <label class="govuk-label govuk-date-input__label" for="dueDate-year">Year</label>
+                                <input class="govuk-input govuk-date-input__input govuk-input--width-4 {% if errors.dueDate %}govuk-input--error{% endif %}"
+                                    id="dueDate-year" name="dueDate-year" type="text"
+                                    inputmode="numeric" value="{{ data['dueDate-year'] }}">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+           
+            {# Dynamic Form Button #}
+            <div class="govuk-button-group">
+                {% if data.id %}
+                <button class="govuk-button" data-module="govuk-button" type="submit">Update Task</button>
+                {% else %}
+                <button class="govuk-button" data-module="govuk-button" type="submit">Submit Task</button>
+                {% endif %}
+            </div>
+        </form>
+    </main>
+</div>
+{% endblock %}
